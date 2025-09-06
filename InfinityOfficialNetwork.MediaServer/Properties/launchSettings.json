@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "InfinityOfficialNetwork.MediaServer": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
