@@ -1,20 +1,13 @@
-﻿using InfinityOfficialNetwork.MediaServer.Native.Transcoding;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace InfinityOfficialNetwork.MediaServer
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.Out.WriteLine("Hello World");
-
-            NativeLibrary.SetLoggingLevel(AvLogLevel.AvLogInfo);
-
-            NativeLibrary.SetLogging((s, l) =>
-            {
-                Console.WriteLine($"[{l}] {s}");
-            });
-            NativeLibrary.Test();
         }
     }
 }

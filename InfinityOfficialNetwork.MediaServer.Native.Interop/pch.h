@@ -7,16 +7,25 @@
 #ifndef PCH_H
 #define PCH_H
 
-#define BEGIN_MANAGED _Pragma("managed(push,on)")
-#define BEGIN_UNMANAGED _Pragma("managed(push,off)")
-#define END_MANAGED _Pragma("managed(pop)")
+#include <Windows.h>
 
-#pragma managed(push,on)
+#pragma warning(disable: 4950)
 
-#include <boost/asio/detail/socket_types.hpp>
+#include <msclr/all.h>
+#include <msclr/appdomain.h>
+#include <msclr/auto_gcroot.h>
+#include <msclr/auto_handle.h>
+#include <msclr/event.h>
+#include <msclr/gcroot.h>
+#include <msclr/lock.h>
+#include <msclr/marshal.h>
+#include <msclr/marshal_atl.h>
+#include <msclr/marshal_cppstd.h>
+#include <msclr/marshal_windows.h>
+#include <msclr/safebool.h>
 
-#include <boost/any.hpp>
-#include <boost/process.hpp>
+#pragma warning(default: 4950)
+
 
 #include <algorithm>
 #include <any>
@@ -130,42 +139,5 @@
 #include <variant>
 #include <vector>
 #include <version>
-
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/opt.h>
-#include <libavutil/timestamp.h>
-#include <libavutil/imgutils.h>
-#include <libavfilter/buffersink.h>
-#include <libavfilter/buffersrc.h>
-#include <libavutil/channel_layout.h>
-#include <libavutil/mem.h>
-#include <libavutil/pixdesc.h>
-}
-
-
-#pragma warning(disable: 4950)
-
-#include <msclr/all.h>
-#include <msclr/appdomain.h>
-#include <msclr/auto_gcroot.h>
-#include <msclr/auto_handle.h>
-#include <msclr/event.h>
-#include <msclr/gcroot.h>
-#include <msclr/lock.h>
-#include <msclr/marshal.h>
-#include <msclr/marshal_atl.h>
-#include <msclr/marshal_cppstd.h>
-#include <msclr/marshal_windows.h>
-#include <msclr/safebool.h>
-
-#pragma warning(default: 4950)
-
-#include <Windows.h>
-
-#pragma managed(pop)
-
-
 
 #endif //PCH_H

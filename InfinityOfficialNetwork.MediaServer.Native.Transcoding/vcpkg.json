@@ -6,6 +6,7 @@
         "all",
         "all-gpl"
       ]
-    }
+    },
+    "boost"
   ]
 }

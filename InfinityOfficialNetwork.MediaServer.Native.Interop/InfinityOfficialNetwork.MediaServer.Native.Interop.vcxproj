@@ -29,7 +29,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <EnableManagedPackageReferenceSupport>true</EnableManagedPackageReferenceSupport>
-    <ProjectGuid>{C53B8A36-F999-4705-09F1-4E20569808F4}</ProjectGuid>
+    <ProjectGuid>{C53B8A36-F999-4705-09F1-4E20569808F5}</ProjectGuid>
     <Keyword>NetCoreCProj</Keyword>
     <RootNamespace>InfinityOfficialNetworkMediaServerNativeTranscoding</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
@@ -134,7 +134,6 @@
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
-    <VcpkgXUseBuiltInApplocalDeps>true</VcpkgXUseBuiltInApplocalDeps>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <VcpkgInstalledDir>$(SolutionDir)Intermediate\$(Platform)\$(Configuration)\$(ProjectName)\Vcpkg\</VcpkgInstalledDir>
@@ -241,19 +240,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AvContainer.h" />
-    <ClInclude Include="marshal.h" />
-    <ClInclude Include="MetadataReader.h" />
-    <ClInclude Include="NativeLibrary.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="AvContainer.cpp" />
-    <ClCompile Include="marshal.cpp" />
-    <ClCompile Include="MetadataReader.cpp" />
-    <ClCompile Include="NativeLibrary.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
