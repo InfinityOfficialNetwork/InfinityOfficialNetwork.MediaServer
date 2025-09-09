@@ -15,36 +15,130 @@ extern "C" {
 #include <libavutil/pixdesc.h>
 }
 
-namespace {
-	class TranscoderImpl {
-		AVFormatContext* ifmt_ctx;
-		AVFormatContext* ofmt_ctx;
-		typedef struct FilteringContext {
-			AVFilterContext* buffersink_ctx;
-			AVFilterContext* buffersrc_ctx;
-			AVFilterGraph* filter_graph;
+using namespace InfinityOfficialNetwork::MediaServer::Native::Core;
 
-			AVPacket* enc_pkt;
-			AVFrame* filtered_frame;
+namespace {
+
+	struct MemoryBuffer {
+		const uint8_t* data;
+		size_t size;
+		size_t pos;
+	};
+
+	// Custom read function
+	static int __cdecl read_packet(void* opaque, uint8_t* buf, int buf_size) {
+		MemoryBuffer* mem_buffer = static_cast<MemoryBuffer*>(opaque);
+
+		// Check if we have reached the end of the buffer
+		if (mem_buffer->pos >= mem_buffer->size) {
+			return AVERROR_EOF;
+		}
+
+		// Determine how many bytes to read
+		size_t bytes_to_read = mem_buffer->size - mem_buffer->pos;
+		if (bytes_to_read > buf_size) {
+			bytes_to_read = buf_size;
+		}
+
+		// Copy data from the memory buffer to FFmpeg's buffer
+		memcpy(buf, mem_buffer->data + mem_buffer->pos, bytes_to_read);
+		mem_buffer->pos += bytes_to_read;
+
+		return static_cast<int>(bytes_to_read);
+	}
+
+	// Custom seek function
+	static int64_t __cdecl seek_packet(void* opaque, int64_t offset, int whence) {
+		MemoryBuffer* mem_buffer = static_cast<MemoryBuffer*>(opaque);
+
+		switch (whence) {
+		case SEEK_SET:
+			if (offset >= 0 && static_cast<size_t>(offset) <= mem_buffer->size) {
+				mem_buffer->pos = static_cast<size_t>(offset);
+				return mem_buffer->pos;
+			}
+			break;
+		case SEEK_CUR:
+			if (static_cast<size_t>(offset + mem_buffer->pos) <= mem_buffer->size) {
+				mem_buffer->pos += offset;
+				return mem_buffer->pos;
+			}
+			break;
+		case SEEK_END:
+			if (static_cast<size_t>(mem_buffer->size + offset) <= mem_buffer->size) {
+				mem_buffer->pos = mem_buffer->size + offset;
+				return mem_buffer->pos;
+			}
+			break;
+		case AVSEEK_SIZE:
+			return mem_buffer->size;
+		}
+
+		return AVERROR(EINVAL);
+	}
+
+	struct TranscoderImpl {
+		AVFormatContext* ifmt_ctx = nullptr;
+		AVFormatContext* ofmt_ctx = nullptr;
+		typedef struct FilteringContext {
+			AVFilterContext* buffersink_ctx = nullptr;
+			AVFilterContext* buffersrc_ctx = nullptr;
+			AVFilterGraph* filter_graph = nullptr;
+
+			AVPacket* enc_pkt = nullptr;
+			AVFrame* filtered_frame = nullptr;
 		} FilteringContext;
-		FilteringContext* filter_ctx;
+		FilteringContext* filter_ctx = nullptr;
 
 		typedef struct StreamContext {
-			AVCodecContext* dec_ctx;
-			AVCodecContext* enc_ctx;
+			AVCodecContext* dec_ctx = nullptr;
+			AVCodecContext* enc_ctx = nullptr;
 
-			AVFrame* dec_frame;
+			AVFrame* dec_frame = nullptr;
 		} StreamContext;
-		StreamContext* stream_ctx;
+		StreamContext* stream_ctx = nullptr;
 
-		int open_input_file(const char* filename)
+		std::unique_ptr<MemoryBuffer> inputFile, outputFile;
+
+		int open_input_file(std::span<unsigned char> inputFileData)
 		{
 			int ret;
 			unsigned int i;
 
-			ifmt_ctx = NULL;
-			if ((ret = avformat_open_input(&ifmt_ctx, filename, NULL, NULL)) < 0) {
-				av_log(NULL, AV_LOG_ERROR, "Cannot open input file\n");
+			// Create the custom FFmpeg I/O context.
+			unsigned char* io_buffer = (unsigned char*)av_malloc(4096);
+			if (!io_buffer) {
+				av_log(NULL, AV_LOG_ERROR, "Failed to allocate AVIO buffer\n");
+				return AVERROR(ENOMEM);
+			}
+
+			// Create the struct to hold our buffer data.
+			inputFile = std::move(std::make_unique<MemoryBuffer>());
+			inputFile->data = inputFileData.data();
+			inputFile->size = inputFileData.size();
+
+			AVIOContext* avio_ctx = avio_alloc_context(
+				io_buffer, 4096, 0, inputFile.get(), read_packet, nullptr, seek_packet
+			);
+			if (!avio_ctx) {
+				av_log(NULL, AV_LOG_ERROR, "Failed to allocate AVIO context\n");
+				av_free(io_buffer);
+				return AVERROR(ENOMEM);
+			}
+
+			ifmt_ctx = avformat_alloc_context();
+			if (!ifmt_ctx) {
+				av_log(NULL, AV_LOG_ERROR, "Failed to allocate AVFormatContext\n");
+				avio_context_free(&avio_ctx);
+				return AVERROR(ENOMEM);
+			}
+
+			// Set the custom AVIOContext to the AVFormatContext.
+			ifmt_ctx->pb = avio_ctx;
+
+			if ((ret = avformat_open_input(&ifmt_ctx, nullptr, nullptr, nullptr)) < 0) {
+				av_log(NULL, AV_LOG_ERROR, "Cannot open input from buffer\n");
+				avio_context_free(&avio_ctx);
 				return ret;
 			}
 
@@ -100,7 +194,7 @@ namespace {
 					return AVERROR(ENOMEM);
 			}
 
-			av_dump_format(ifmt_ctx, 0, filename, 0);
+			//av_dump_format(ifmt_ctx, 0, filename, 0);
 			return 0;
 		}
 
@@ -421,7 +515,7 @@ namespace {
 			AVPacket* enc_pkt = filter->enc_pkt;
 			int ret;
 
-			av_log(NULL, AV_LOG_INFO, "Encoding frame\n");
+			//av_log(NULL, AV_LOG_INFO, "Encoding frame\n");
 			/* encode filtered frame */
 			av_packet_unref(enc_pkt);
 
@@ -459,7 +553,7 @@ namespace {
 			FilteringContext* filter = &filter_ctx[stream_index];
 			int ret;
 
-			av_log(NULL, AV_LOG_INFO, "Pushing decoded frame to filters\n");
+			//av_log(NULL, AV_LOG_INFO, "Pushing decoded frame to filters\n");
 			/* push the decoded frame into the filtergraph */
 			ret = av_buffersrc_add_frame_flags(filter->buffersrc_ctx,
 				frame, 0);
@@ -470,7 +564,7 @@ namespace {
 
 			/* pull filtered frames from the filtergraph */
 			while (1) {
-				av_log(NULL, AV_LOG_INFO, "Pulling filtered frame from filters\n");
+				//av_log(NULL, AV_LOG_INFO, "Pulling filtered frame from filters\n");
 				ret = av_buffersink_get_frame(filter->buffersink_ctx,
 					filter->filtered_frame);
 				if (ret < 0) {
@@ -504,26 +598,26 @@ namespace {
 			return encode_write_frame(stream_index, 1);
 		}
 
-		int main(int argc, char** argv)
+		int transcode(std::span<unsigned char> input, const char* output)
 		{
 			int ret;
 			AVPacket* packet = NULL;
 			unsigned int stream_index;
 			unsigned int i;
 
-			if (argc != 3) {
-				av_log(NULL, AV_LOG_ERROR, "Usage: %s <input file> <output file>\n", argv[0]);
-				return 1;
-			}
+			std::chrono::high_resolution_clock clk;
 
-			if ((ret = open_input_file(argv[1])) < 0)
+			auto begin = clk.now();
+
+			if ((ret = open_input_file(input)) < 0)
 				goto end;
-			if ((ret = open_output_file(argv[2])) < 0)
+			if ((ret = open_output_file(output)) < 0)
 				goto end;
 			if ((ret = init_filters()) < 0)
 				goto end;
 			if (!(packet = av_packet_alloc()))
 				goto end;
+
 
 			/* read all packets */
 			while (1) {
@@ -647,4 +741,18 @@ namespace {
 			return ret ? 1 : 0;
 		}
 	};
+}
+
+void Transcoder::Transcode(std::span<unsigned char> inputFilename, const std::string& outputFilename)
+{
+	TranscoderImpl impl;
+	impl.transcode(inputFilename, outputFilename.c_str());
+}
+
+void Transcoder::TranscodeAsync(std::span<unsigned char> inputFilename, const std::string& outputFilename, std::shared_ptr<TranscoderCompletionCallback>&& callback)
+{
+	std::thread([input = inputFilename, output = std::string(outputFilename), clbk = std::move(callback)]() {
+		Transcode(input, output);
+		clbk->OnCompletion();
+		}).detach();
 }

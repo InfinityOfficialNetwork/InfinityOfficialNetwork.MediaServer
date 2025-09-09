@@ -21,6 +21,8 @@ using namespace InfinityOfficialNetwork::MediaServer::Native::Core;
 
 static std::unique_ptr<LoggingConfiguration> _internal_loggingConfiguration = nullptr;
 
+static std::shared_mutex lock;
+
 static inline void __cdecl NativeCallbackTrampoline(void* avcl, int level, const char* fmt, va_list vl) {
 	if (!_internal_loggingConfiguration)
 		return;
@@ -47,15 +49,21 @@ static inline void __cdecl NativeCallbackTrampoline(void* avcl, int level, const
 	buffer.resize(size + 1);
 	vsnprintf(buffer.data(), buffer.size(), fmt, vl);
 
-	size_t last_pos = buffer.find_last_not_of(" \t\n\r");
-	if (std::string::npos != last_pos)
-		buffer.resize(last_pos + 1);
+	static const std::string lookup = std::string(" \t\n\r").append(1, '\0');
+	size_t last_pos = buffer.find_last_not_of(lookup);
+	if (std::string::npos == last_pos)
+		last_pos = 0;
+	buffer.resize(last_pos);
 
-	_internal_loggingConfiguration->Logger->LogMessage((AvLogLevel)level, buffer, class_name);
+	{
+		std::unique_lock guard(lock);
+		_internal_loggingConfiguration->Logger->LogMessage((AvLogLevel)level, buffer, class_name);
+	}
 }
 
 void NativeLibraryConfig::ConfigureLogging(LoggingConfiguration loggingConfiguration)
 {
+	avformat_network_init();
 	_internal_loggingConfiguration = std::make_unique<LoggingConfiguration>(loggingConfiguration);
 	av_log_set_callback(NativeCallbackTrampoline);
 }
