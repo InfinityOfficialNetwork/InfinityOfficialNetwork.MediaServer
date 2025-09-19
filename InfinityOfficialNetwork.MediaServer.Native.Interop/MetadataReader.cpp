@@ -25,7 +25,7 @@ Interop::MediaMetadata^ Interop::MetadataReader::GetMetadata(Interop::MediaConta
 {
 	std::unique_ptr<ManagedHandle> n_handle = std::make_unique<ManagedHandle>(container);
 	pin_ptr<Byte> data_ptr = (&n_handle->container->Data[0]);
-	std::span<Byte> n_data((Byte*)data_ptr, n_handle->container->Data->Length);
+	std::span<Byte> n_data((Byte*)data_ptr, n_handle->container->Data.Length);
 
 	Core::MediaContainer n_mediaContainer(std::move(n_data), std::move(n_handle));
 

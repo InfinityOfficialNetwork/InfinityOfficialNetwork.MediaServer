@@ -28,7 +28,7 @@ namespace InfinityOfficialNetwork::MediaServer::Native::Core {
 	class __INFINITYOFFICIALNETWORK_MEDIASERVER_NATIVE_CORE_API LoggingProvider
 	{
 	public:
-		virtual void LogMessage(AvLogLevel level, std::string message, std::string source) = 0;
+		virtual void LogMessage(AvLogLevel level, std::string message, std::string source, int thread) = 0;
 	};
 
 

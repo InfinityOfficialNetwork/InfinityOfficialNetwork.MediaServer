@@ -36,4 +36,4 @@ namespace InfinityOfficialNetwork::MediaServer::Native::Core {
 		MediaContainer(const std::vector<unsigned char> data);
 	};
 
-}
+} 

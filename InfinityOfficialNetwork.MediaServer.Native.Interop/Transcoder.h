@@ -1,12 +1,14 @@
 #pragma once
 
+#include "MediaContainer.h"
+
 namespace InfinityOfficialNetwork::MediaServer::Native::Interop {
 
 	public ref class Transcoder
 	{
 	public:
-		static void Transcode(System::Span<System::Byte> input, System::String^ output);
-		//static System::Threading::Tasks::Task^ TranscodeAsync(System::String^ input, System::String^ output);
+		static MediaContainer^ Transcode(Interop::MediaContainer^ input);
+		static System::Threading::Tasks::Task<MediaContainer^>^ TranscodeAsync(Interop::MediaContainer^ input);
 	};
 
 }

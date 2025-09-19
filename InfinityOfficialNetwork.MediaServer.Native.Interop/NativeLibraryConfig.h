@@ -17,7 +17,7 @@ namespace InfinityOfficialNetwork::MediaServer::Native::Interop {
 	public ref class LoggingConfiguration
 	{
 	public:
-		System::Action<AvLogLevel, System::String^, System::String^>^ Logger;
+		System::Action<AvLogLevel, System::String^, System::String^,int>^ Logger;
 		AvLogLevel Level;
 		System::Collections::Generic::IDictionary<System::String^, AvLogLevel>^ ClassLevelOverrides;
 	};

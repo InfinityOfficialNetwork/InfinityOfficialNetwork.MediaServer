@@ -10,35 +10,42 @@ using namespace System::Threading::Tasks;
 
 namespace {
 	struct TaskCallback : Core::TranscoderCompletionCallback {
-		gcroot<TaskCompletionSource^> tcs;
-		virtual void OnCompletion() override {
-			tcs->SetResult();
+		gcroot<TaskCompletionSource<Interop::MediaContainer^>^> tcs;
+		virtual void OnCompletion(std::shared_ptr<std::vector<unsigned char>> result) override {
+			Interop::MediaContainer^ ret = gcnew Interop::NativeBackedMediaContainer(std::move(result));
+			tcs->SetResult(ret);
 		}
 
-		TaskCallback(gcroot<TaskCompletionSource^> tcs) : tcs(tcs) {}
+		TaskCallback(gcroot<TaskCompletionSource<Interop::MediaContainer^>^> tcs) : tcs(tcs) {}
 	};
 }
 
-void Interop::Transcoder::Transcode(System::Span<System::Byte> input, System::String^ output)
+Interop::MediaContainer^ Interop::Transcoder::Transcode(Interop::MediaContainer^ input)
 {
-	unsigned char% ref = input.GetPinnableReference();
+	unsigned char% ref = input->Data.GetPinnableReference();
 	pin_ptr<System::Byte> pinnedPtr = &ref;
 
-	std::span<unsigned char> n_data((unsigned char*)pinnedPtr, input.Length);
+	std::span<unsigned char> n_data((unsigned char*)pinnedPtr, input->Data.Length);
 
-	std::string n_output = msclr::interop::marshal_as<std::string>(output);
+	std::shared_ptr<std::vector<unsigned char>> result = std::move(Core::Transcoder::Transcode(n_data));
 
-	Core::Transcoder::Transcode(n_data, n_output);
+
+
+	Interop::MediaContainer^ ret = gcnew Interop::NativeBackedMediaContainer(std::move(result));
+
+	return ret;
 }
 
-//System::Threading::Tasks::Task^ Interop::Transcoder::TranscodeAsync(System::String^ input, System::String^ output)
-//{
-//	std::string n_input = msclr::interop::marshal_as<std::string>(input),
-//		n_output = msclr::interop::marshal_as<std::string>(output);
-//	
-//	TaskCompletionSource^ tcs = gcnew TaskCompletionSource();
-//
-//	Core::Transcoder::TranscodeAsync(n_input, n_output, std::move((std::shared_ptr<Core::TranscoderCompletionCallback>)std::make_shared<TaskCallback>(gcroot<TaskCompletionSource^>(tcs))));
-//
-//	return tcs->Task;
-//}
+System::Threading::Tasks::Task<Interop::MediaContainer^>^ Interop::Transcoder::TranscodeAsync(Interop::MediaContainer^ input)
+{
+	unsigned char% ref = input->Data.GetPinnableReference();
+	pin_ptr<System::Byte> pinnedPtr = &ref;
+
+	std::span<unsigned char> n_data((unsigned char*)pinnedPtr, input->Data.Length);
+	
+	TaskCompletionSource<Interop::MediaContainer^>^ tcs = gcnew TaskCompletionSource<Interop::MediaContainer^>();
+
+	Core::Transcoder::TranscodeAsync(n_data, std::move((std::shared_ptr<Core::TranscoderCompletionCallback>)std::make_shared<TaskCallback>(gcroot<TaskCompletionSource<Interop::MediaContainer^>^>(tcs))));
+
+	return tcs->Task;
+}

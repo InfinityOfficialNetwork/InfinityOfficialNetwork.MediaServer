@@ -14,19 +14,19 @@ using namespace InfinityOfficialNetwork::MediaServer::Native;
 
 namespace {
 	struct ManagedLoggingProvider : Core::LoggingProvider {
-		gcroot<Action<Interop::AvLogLevel, String^, String^>^> logger;
+		gcroot<Action<Interop::AvLogLevel, String^, String^,int>^> logger;
 		
 		// Inherited via LoggingProvider
-		void LogMessage(Core::AvLogLevel level, std::string message, std::string source) override
+		void LogMessage(Core::AvLogLevel level, std::string message, std::string source, int thread) override
 		{
 			String^ m_message = msclr::interop::marshal_as<String^>(message),
 				^ m_source = msclr::interop::marshal_as<String^>(source);
 			Interop::AvLogLevel m_level = (Interop::AvLogLevel)level;
 
-			logger->Invoke(m_level, m_message, m_source);
+			logger->Invoke(m_level, m_message, m_source, thread);
 		}
 
-		ManagedLoggingProvider(gcroot<Action<Interop::AvLogLevel, String^, String^>^> logger) : logger(logger) {}
+		ManagedLoggingProvider(gcroot<Action<Interop::AvLogLevel, String^, String^,int>^> logger) : logger(logger) {}
 	};
 }
 
@@ -41,7 +41,7 @@ static InfinityOfficialNetwork::MediaServer::Native::Interop::NativeLibraryConfi
 
 void Interop::NativeLibraryConfig::ConfigureLogging(Interop::LoggingConfiguration^ loggingConfiguration)
 {
-	std::shared_ptr<Core::LoggingProvider> n_logger = std::make_shared<ManagedLoggingProvider>(gcroot<Action<Interop::AvLogLevel, String^, String^>^>(loggingConfiguration->Logger));
+	std::shared_ptr<Core::LoggingProvider> n_logger = std::make_shared<ManagedLoggingProvider>(gcroot<Action<Interop::AvLogLevel, String^, String^,int>^>(loggingConfiguration->Logger));
 
 	Core::AvLogLevel n_level = Core::AvLogLevel(loggingConfiguration->Level);
 	std::map<std::string, Core::AvLogLevel> n_classLevelOverride;

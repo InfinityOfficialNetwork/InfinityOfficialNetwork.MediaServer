@@ -6,27 +6,26 @@ namespace InfinityOfficialNetwork.MediaServer
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             Console.Out.WriteLine("Hello World");
 
             LoggingConfiguration configuration = new LoggingConfiguration {
                 ClassLevelOverrides = new Dictionary<string,AvLogLevel>(),
-                Level = AvLogLevel.AvLogDebug,
-                Logger = (level, message, cls) =>
+                Level = AvLogLevel.AvLogVerbose,
+                Logger = (level, message, cls, tid) =>
                 {
-                    Console.WriteLine($"[{level}] [{cls}] {message}");
-                    if (cls == "AVCodecContext")
-                        Console.WriteLine();
+                    Console.WriteLine($"[{level}] [{tid}] [{cls}] {message}");
                 }
             };
 
             NativeLibraryConfig.ConfigureLogging(configuration);
 
-            byte[] file = await File.ReadAllBytesAsync(@"C:\Users\InfiniPLEX\Videos\videoplayback.mp4");
-            Span<byte> fileSpan = new Span<byte>(file);
+            byte[] file = File.ReadAllBytesAsync(@"C:\Users\InfiniPLEX\Videos\videoplayback.mp4").Result;
+            
+            MediaContainer input = new ArrayBackedMediaContainer(file);
 
-            Transcoder.Transcode(fileSpan, @"C:\Users\InfiniPLEX\Videos\videoplayback2.mkv");
+            MediaContainer output = Transcoder.TranscodeAsync(input).Result;
 
             //MediaContainer mediaContainer = new MediaContainer();
 

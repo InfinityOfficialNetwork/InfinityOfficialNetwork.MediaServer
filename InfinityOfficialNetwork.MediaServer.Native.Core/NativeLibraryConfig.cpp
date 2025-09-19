@@ -55,9 +55,12 @@ static inline void __cdecl NativeCallbackTrampoline(void* avcl, int level, const
 		last_pos = 0;
 	buffer.resize(last_pos);
 
+	std::thread::id threadId = std::this_thread::get_id();
+	int i_threadId = atoi((std::ostringstream() << threadId).str().c_str());
+
 	{
 		std::unique_lock guard(lock);
-		_internal_loggingConfiguration->Logger->LogMessage((AvLogLevel)level, buffer, class_name);
+		_internal_loggingConfiguration->Logger->LogMessage((AvLogLevel)level, buffer, class_name, i_threadId);
 	}
 }
 

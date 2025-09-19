@@ -19,63 +19,169 @@ using namespace InfinityOfficialNetwork::MediaServer::Native::Core;
 
 namespace {
 
+	// Custom struct to represent a single 1MB page of data.
+	struct Page {
+		static constexpr size_t PAGE_SIZE = 1 << 20;
+		uint8_t data[PAGE_SIZE];
+	};
+
+	// This struct now represents a dynamic, paged memory buffer.
+	struct WritableMemoryBuffer {
+		std::vector<Page> pages;
+		size_t pos = 0; // Current position in the buffer.
+		size_t total_size = 0;
+
+		// Custom read function for AVIOContext
+		static int __cdecl read_packet(void* opaque, uint8_t* buf, int buf_size) {
+			WritableMemoryBuffer* mem_buffer = static_cast<WritableMemoryBuffer*>(opaque);
+
+			// Check if we have reached the end of the buffer
+			if (mem_buffer->pos >= mem_buffer->total_size) {
+				return AVERROR_EOF;
+			}
+
+			size_t remaining_in_buffer = mem_buffer->total_size - mem_buffer->pos;
+			size_t bytes_to_read = static_cast<size_t>(buf_size);
+			if (bytes_to_read > remaining_in_buffer) {
+				bytes_to_read = remaining_in_buffer;
+			}
+
+			size_t bytes_read = 0;
+			while (bytes_read < bytes_to_read) {
+				size_t current_page_index = mem_buffer->pos / Page::PAGE_SIZE;
+				size_t current_page_offset = mem_buffer->pos % Page::PAGE_SIZE;
+
+				size_t remaining_in_page = Page::PAGE_SIZE - current_page_offset;
+				size_t read_this_chunk = std::min(bytes_to_read - bytes_read, remaining_in_page);
+
+				memcpy(buf + bytes_read, mem_buffer->pages[current_page_index].data + current_page_offset, read_this_chunk);
+
+				bytes_read += read_this_chunk;
+				mem_buffer->pos += read_this_chunk;
+			}
+
+			return static_cast<int>(bytes_read);
+		}
+
+		static int __cdecl write_packet(void* opaque, const uint8_t* buf, int buf_size) {
+			WritableMemoryBuffer* mem_buffer = static_cast<WritableMemoryBuffer*>(opaque);
+
+			size_t bytes_to_write = static_cast<size_t>(buf_size);
+			size_t bytes_written = 0;
+
+			while (bytes_written < bytes_to_write) {
+				size_t current_page_index = mem_buffer->pos / Page::PAGE_SIZE;
+				size_t current_page_offset = mem_buffer->pos % Page::PAGE_SIZE;
+
+				// Check if we need to add a new page
+				if (current_page_index >= mem_buffer->pages.size()) {
+					mem_buffer->pages.emplace_back();
+				}
+
+				size_t remaining_in_page = Page::PAGE_SIZE - current_page_offset;
+				size_t write_this_chunk = std::min(bytes_to_write - bytes_written, remaining_in_page);
+
+				memcpy(mem_buffer->pages[current_page_index].data + current_page_offset, buf + bytes_written, write_this_chunk);
+
+				bytes_written += write_this_chunk;
+				mem_buffer->pos += write_this_chunk;
+			}
+
+			mem_buffer->total_size = std::max(mem_buffer->total_size, mem_buffer->pos);
+
+			return static_cast<int>(bytes_written);
+		}
+
+		static int64_t __cdecl seek_packet(void* opaque, int64_t offset, int whence) {
+			WritableMemoryBuffer* mem_buffer = static_cast<WritableMemoryBuffer*>(opaque);
+			int64_t new_pos;
+
+			switch (whence) {
+			case SEEK_SET:
+				new_pos = offset;
+				break;
+			case SEEK_CUR:
+				new_pos = mem_buffer->pos + offset;
+				break;
+			case SEEK_END:
+				new_pos = mem_buffer->total_size + offset;
+				break;
+			case AVSEEK_SIZE:
+				return mem_buffer->total_size;
+			default:
+				return AVERROR(EINVAL);
+			}
+
+			if (new_pos < 0 || new_pos > static_cast<int64_t>(mem_buffer->total_size)) {
+				return AVERROR(EINVAL);
+			}
+
+			mem_buffer->pos = static_cast<size_t>(new_pos);
+			return mem_buffer->pos;
+		}
+	};
+
+
+
 	struct MemoryBuffer {
 		const uint8_t* data;
 		size_t size;
 		size_t pos;
+
+		// Custom read function
+		static int __cdecl read_packet(void* opaque, uint8_t* buf, int buf_size) {
+			MemoryBuffer* mem_buffer = static_cast<MemoryBuffer*>(opaque);
+
+			// Check if we have reached the end of the buffer
+			if (mem_buffer->pos >= mem_buffer->size) {
+				return AVERROR_EOF;
+			}
+
+			// Determine how many bytes to read
+			size_t bytes_to_read = mem_buffer->size - mem_buffer->pos;
+			if (bytes_to_read > buf_size) {
+				bytes_to_read = buf_size;
+			}
+
+			// Copy data from the memory buffer to FFmpeg's buffer
+			memcpy(buf, mem_buffer->data + mem_buffer->pos, bytes_to_read);
+			mem_buffer->pos += bytes_to_read;
+
+			return static_cast<int>(bytes_to_read);
+		}
+
+		// Custom seek function
+		static int64_t __cdecl seek_packet(void* opaque, int64_t offset, int whence) {
+			MemoryBuffer* mem_buffer = static_cast<MemoryBuffer*>(opaque);
+
+			switch (whence) {
+			case SEEK_SET:
+				if (offset >= 0 && static_cast<size_t>(offset) <= mem_buffer->size) {
+					mem_buffer->pos = static_cast<size_t>(offset);
+					return mem_buffer->pos;
+				}
+				break;
+			case SEEK_CUR:
+				if (static_cast<size_t>(offset + mem_buffer->pos) <= mem_buffer->size) {
+					mem_buffer->pos += offset;
+					return mem_buffer->pos;
+				}
+				break;
+			case SEEK_END:
+				if (static_cast<size_t>(mem_buffer->size + offset) <= mem_buffer->size) {
+					mem_buffer->pos = mem_buffer->size + offset;
+					return mem_buffer->pos;
+				}
+				break;
+			case AVSEEK_SIZE:
+				return mem_buffer->size;
+			}
+
+			return AVERROR(EINVAL);
+		}
 	};
 
-	// Custom read function
-	static int __cdecl read_packet(void* opaque, uint8_t* buf, int buf_size) {
-		MemoryBuffer* mem_buffer = static_cast<MemoryBuffer*>(opaque);
 
-		// Check if we have reached the end of the buffer
-		if (mem_buffer->pos >= mem_buffer->size) {
-			return AVERROR_EOF;
-		}
-
-		// Determine how many bytes to read
-		size_t bytes_to_read = mem_buffer->size - mem_buffer->pos;
-		if (bytes_to_read > buf_size) {
-			bytes_to_read = buf_size;
-		}
-
-		// Copy data from the memory buffer to FFmpeg's buffer
-		memcpy(buf, mem_buffer->data + mem_buffer->pos, bytes_to_read);
-		mem_buffer->pos += bytes_to_read;
-
-		return static_cast<int>(bytes_to_read);
-	}
-
-	// Custom seek function
-	static int64_t __cdecl seek_packet(void* opaque, int64_t offset, int whence) {
-		MemoryBuffer* mem_buffer = static_cast<MemoryBuffer*>(opaque);
-
-		switch (whence) {
-		case SEEK_SET:
-			if (offset >= 0 && static_cast<size_t>(offset) <= mem_buffer->size) {
-				mem_buffer->pos = static_cast<size_t>(offset);
-				return mem_buffer->pos;
-			}
-			break;
-		case SEEK_CUR:
-			if (static_cast<size_t>(offset + mem_buffer->pos) <= mem_buffer->size) {
-				mem_buffer->pos += offset;
-				return mem_buffer->pos;
-			}
-			break;
-		case SEEK_END:
-			if (static_cast<size_t>(mem_buffer->size + offset) <= mem_buffer->size) {
-				mem_buffer->pos = mem_buffer->size + offset;
-				return mem_buffer->pos;
-			}
-			break;
-		case AVSEEK_SIZE:
-			return mem_buffer->size;
-		}
-
-		return AVERROR(EINVAL);
-	}
 
 	struct TranscoderImpl {
 		AVFormatContext* ifmt_ctx = nullptr;
@@ -98,7 +204,8 @@ namespace {
 		} StreamContext;
 		StreamContext* stream_ctx = nullptr;
 
-		std::unique_ptr<MemoryBuffer> inputFile, outputFile;
+		std::unique_ptr<MemoryBuffer> inputFile;
+		std::unique_ptr<WritableMemoryBuffer> outputFile;
 
 		int open_input_file(std::span<unsigned char> inputFileData)
 		{
@@ -118,7 +225,7 @@ namespace {
 			inputFile->size = inputFileData.size();
 
 			AVIOContext* avio_ctx = avio_alloc_context(
-				io_buffer, 4096, 0, inputFile.get(), read_packet, nullptr, seek_packet
+				io_buffer, 4096, 0, inputFile.get(), MemoryBuffer::read_packet, nullptr, MemoryBuffer::seek_packet
 			);
 			if (!avio_ctx) {
 				av_log(NULL, AV_LOG_ERROR, "Failed to allocate AVIO context\n");
@@ -198,7 +305,7 @@ namespace {
 			return 0;
 		}
 
-		int open_output_file(const char* filename)
+		int open_output_file()
 		{
 			AVStream* out_stream;
 			AVStream* in_stream;
@@ -207,12 +314,30 @@ namespace {
 			int ret;
 			unsigned int i;
 
-			ofmt_ctx = NULL;
-			avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
+			outputFile = std::make_unique<WritableMemoryBuffer>();
+
+			// Use a custom AVIOContext to write to the memory buffer.
+			// The buffer size is 4096, the write flag is 1, and the opaque pointer is our WritableMemoryBuffer.
+			uint8_t* avio_buffer = static_cast<uint8_t*>(av_malloc(4096));
+			AVIOContext* avio_ctx = avio_alloc_context(avio_buffer, 4096, 1, outputFile.get(), WritableMemoryBuffer::read_packet, WritableMemoryBuffer::write_packet, WritableMemoryBuffer::seek_packet);
+			if (!avio_ctx) {
+				av_log(NULL, AV_LOG_FATAL, "Failed to allocate AVIOContext\n");
+				av_freep(&avio_buffer);
+				return AVERROR(ENOMEM);
+			}
+
+			// The filename parameter is now NULL, as we are writing to memory.
+			// The container format will be determined by the added streams.
+			ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, "matroska", NULL);
 			if (!ofmt_ctx) {
-				av_log(NULL, AV_LOG_ERROR, "Could not create output context\n");
+				char buf[64];
+				std::string str = av_make_error_string(buf, sizeof(buf), ret);
+				av_log(NULL, AV_LOG_ERROR, (std::string("Could not create output context: ") + str).c_str());
 				return AVERROR_UNKNOWN;
 			}
+
+			// Assign the custom AVIOContext to the output format context's pb field.
+			ofmt_ctx->pb = avio_ctx;
 
 
 			for (i = 0; i < ifmt_ctx->nb_streams; i++) {
@@ -297,15 +422,15 @@ namespace {
 				}
 
 			}
-			av_dump_format(ofmt_ctx, 0, filename, 1);
+			//av_dump_format(ofmt_ctx, 0, 1);
 
-			if (!(ofmt_ctx->oformat->flags & AVFMT_NOFILE)) {
-				ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
-				if (ret < 0) {
-					av_log(NULL, AV_LOG_ERROR, "Could not open output file '%s'", filename);
-					return ret;
-				}
-			}
+			//if (!(ofmt_ctx->oformat->flags & AVFMT_NOFILE)) {
+			//	ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
+			//	if (ret < 0) {
+			//		av_log(NULL, AV_LOG_ERROR, "Could not open output file '%s'", filename);
+			//		return ret;
+			//	}
+			//}
 
 			/* init muxer, write output file header */
 			ret = avformat_write_header(ofmt_ctx, NULL);
@@ -598,7 +723,7 @@ namespace {
 			return encode_write_frame(stream_index, 1);
 		}
 
-		int transcode(std::span<unsigned char> input, const char* output)
+		int transcode(std::span<unsigned char> input)
 		{
 			int ret;
 			AVPacket* packet = NULL;
@@ -611,7 +736,7 @@ namespace {
 
 			if ((ret = open_input_file(input)) < 0)
 				goto end;
-			if ((ret = open_output_file(output)) < 0)
+			if ((ret = open_output_file()) < 0)
 				goto end;
 			if ((ret = init_filters()) < 0)
 				goto end;
@@ -728,8 +853,8 @@ namespace {
 			av_free(filter_ctx);
 			av_free(stream_ctx);
 			avformat_close_input(&ifmt_ctx);
-			if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
-				avio_closep(&ofmt_ctx->pb);
+			//if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
+			//	avio_closep(&ofmt_ctx->pb);
 			avformat_free_context(ofmt_ctx);
 
 			if (ret < 0) {
@@ -743,16 +868,30 @@ namespace {
 	};
 }
 
-void Transcoder::Transcode(std::span<unsigned char> inputFilename, const std::string& outputFilename)
+std::shared_ptr<std::vector<unsigned char>> Transcoder::Transcode(std::span<unsigned char> inputFilename)
 {
 	TranscoderImpl impl;
-	impl.transcode(inputFilename, outputFilename.c_str());
+	impl.transcode(inputFilename);
+	std::shared_ptr<std::vector<unsigned char>> outputFileData = std::make_unique<std::vector<unsigned char>>(impl.outputFile->total_size);
+
+	unsigned char* dest_ptr = outputFileData->data();
+	size_t current_pos = 0;
+
+	for (size_t i = 0, end = impl.outputFile->pages.size(); i < end - 1; i++) {
+		memcpy(dest_ptr + current_pos, impl.outputFile->pages[i].data, Page::PAGE_SIZE);
+		current_pos += Page::PAGE_SIZE;
+	}
+
+	memcpy(dest_ptr + current_pos, impl.outputFile->pages.back().data, impl.outputFile->total_size % Page::PAGE_SIZE);
+
+
+	return outputFileData;
 }
 
-void Transcoder::TranscodeAsync(std::span<unsigned char> inputFilename, const std::string& outputFilename, std::shared_ptr<TranscoderCompletionCallback>&& callback)
+void Transcoder::TranscodeAsync(std::span<unsigned char> inputFile, std::shared_ptr<TranscoderCompletionCallback> callback)
 {
-	std::thread([input = inputFilename, output = std::string(outputFilename), clbk = std::move(callback)]() {
-		Transcode(input, output);
-		clbk->OnCompletion();
+	std::thread([input = inputFile, clbk = std::move(callback)]() {
+		std::shared_ptr<std::vector<unsigned char>> ret = Transcode(input);
+		clbk->OnCompletion(std::move(ret));
 		}).detach();
 }
