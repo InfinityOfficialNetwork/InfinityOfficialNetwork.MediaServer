@@ -41,7 +41,7 @@ namespace InfinityOfficialNetwork::MediaServer::Native::Interop {
 	public:
 		property System::Span<System::Byte> Data {
 			virtual System::Span<System::Byte> get() override {
-				return System::Runtime::InteropServices::MemoryMarshal::CreateSpan(System::Runtime::CompilerServices::Unsafe::AsRef<System::Byte>(native_data->get()->data()), native_data->get()->size());
+				return System::Runtime::InteropServices::MemoryMarshal::CreateSpan(System::Runtime::CompilerServices::Unsafe::AsRef<System::Byte>(native_data->get()->data()), (int)native_data->get()->size());
 			}
 		}
 

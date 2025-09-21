@@ -1,0 +1,10 @@
+#pragma once
+
+#pragma warning(disable: 4251)
+
+#ifdef __INFINITYOFFICIALNETWORK_MEDIASERVER_NATIVE_INTEROP_EXPORTS
+#define __INFINITYOFFICIALNETWORK_MEDIASERVER_NATIVE_INTEROP_API __declspec(dllexport)
+#else
+#define __INFINITYOFFICIALNETWORK_MEDIASERVER_NATIVE_INTEROP_API __declspec(dllimport)
+#endif
+

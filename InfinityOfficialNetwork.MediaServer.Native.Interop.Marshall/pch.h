@@ -7,9 +7,25 @@
 #ifndef PCH_H
 #define PCH_H
 
-#pragma warning( push, 0 )
+#include <Windows.h>
 
-// add headers that you want to pre-compile here
+#pragma warning(disable: 4950)
+
+#include <msclr/all.h>
+#include <msclr/appdomain.h>
+#include <msclr/auto_gcroot.h>
+#include <msclr/auto_handle.h>
+#include <msclr/event.h>
+#include <msclr/gcroot.h>
+#include <msclr/lock.h>
+#include <msclr/marshal.h>
+#include <msclr/marshal_atl.h>
+#include <msclr/marshal_cppstd.h>
+#include <msclr/marshal_windows.h>
+#include <msclr/safebool.h>
+
+#pragma warning(default: 4950)
+
 
 #include <algorithm>
 #include <any>
@@ -55,14 +71,14 @@
 #include <deque>
 #include <exception>
 #include <execution>
-//#include <expected>
+#include <expected>
 #include <filesystem>
 #include <format>
 #include <forward_list>
 #include <fstream>
 #include <functional>
 #include <future>
-//#include <generator>
+#include <generator>
 //#include <hash_map>
 //#include <hash_set>
 #include <initializer_list>
@@ -77,7 +93,7 @@
 #include <list>
 #include <locale>
 #include <map>
-//#include <mdspan>
+#include <mdspan>
 #include <memory>
 #include <memory_resource>
 #include <mutex>
@@ -86,7 +102,7 @@
 #include <numeric>
 #include <optional>
 #include <ostream>
-//#include <print>
+#include <print>
 #include <queue>
 #include <random>
 #include <ranges>
@@ -98,12 +114,12 @@
 #include <shared_mutex>
 #include <source_location>
 #include <span>
-//#include <spanstream>
+#include <spanstream>
 #include <sstream>
 #include <stack>
-//#include <stacktrace>
+#include <stacktrace>
 #include <stdexcept>
-//#include <stdfloat>
+#include <stdfloat>
 #include <stop_token>
 #include <streambuf>
 #include <string>
@@ -123,25 +139,5 @@
 #include <variant>
 #include <vector>
 #include <version>
-
-
-#include <boost/asio.hpp>
-
-#include "Windows.h"
-
-#undef min
-#undef max
-
-#include <boost/json.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/smart_ptr.hpp>
-#include <boost/regex.hpp>
-#include <boost/thread.hpp>
-#include <boost/lockfree/queue.hpp>
-#include <boost/lockfree/stack.hpp>
-
-
-
-#pragma warning( pop )
 
 #endif //PCH_H

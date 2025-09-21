@@ -1,6 +1,5 @@
 {
   "dependencies": [
-    "boost",
-    "jemalloc"
+
   ]
 }
