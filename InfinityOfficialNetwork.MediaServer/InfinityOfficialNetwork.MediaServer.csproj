@@ -23,4 +23,19 @@
 	  <ProjectReference Include="..\InfinityOfficialNetwork.MediaServer.Native.Interop\InfinityOfficialNetwork.MediaServer.Native.Interop.vcxproj" />
 	</ItemGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<RuntimeIdentifier>win-x84</RuntimeIdentifier>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<RuntimeIdentifier>win-arm64</RuntimeIdentifier>
+	</PropertyGroup>
+
 </Project>

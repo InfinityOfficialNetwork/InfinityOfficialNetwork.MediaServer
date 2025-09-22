@@ -8,6 +8,9 @@
 #define PCH_H
 
 // add headers that you want to pre-compile here
-#include "framework.h"
+
+#pragma warning( push, 0 )
+#include <jemalloc/jemalloc.h>
+#pragma warning( pop )
 
 #endif //PCH_H

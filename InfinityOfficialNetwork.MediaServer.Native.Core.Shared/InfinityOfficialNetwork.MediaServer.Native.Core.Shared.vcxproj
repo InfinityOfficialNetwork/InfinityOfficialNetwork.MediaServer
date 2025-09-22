@@ -35,17 +35,20 @@
   </PropertyGroup>
   <Import Project="$(SolutionDir)CommonVcx.props" />
   <ItemGroup>
-    <ClInclude Include="allocation.h" />
     <ClInclude Include="BlockingThreadPool.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GlobalIoContext.h" />
     <ClInclude Include="NativeThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="allocation.cpp" />
     <ClCompile Include="BlockingThreadPool.cpp" />
     <ClCompile Include="GlobalIoContext.cpp" />
     <ClCompile Include="NativeThreadPool.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InfinityOfficialNetwork.MediaServer.Native.Allocator\InfinityOfficialNetwork.MediaServer.Native.Allocator.vcxproj">
+      <Project>{c0596e99-ed5a-46f5-afee-d4a97c6cf964}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

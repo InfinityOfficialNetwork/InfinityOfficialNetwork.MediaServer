@@ -43,6 +43,12 @@
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\InfinityOfficialNetwork.MediaServer.Native.Allocator\InfinityOfficialNetwork.MediaServer.Native.Allocator.vcxproj">
+      <Project>{c0596e99-ed5a-46f5-afee-d4a97c6cf964}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\InfinityOfficialNetwork.MediaServer.Native.Core.Shared\InfinityOfficialNetwork.MediaServer.Native.Core.Shared.vcxproj">
+      <Project>{0f44a4d9-b904-4b41-9152-24bcfc79dec3}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
