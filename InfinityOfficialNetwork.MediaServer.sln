@@ -11,11 +11,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{02EA68
 	ProjectSection(SolutionItems) = preProject
 		CommonVcx.props = CommonVcx.props
 		CommonVcxNetCore.props = CommonVcxNetCore.props
+		CommonVcxStatic.props = CommonVcxStatic.props
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InfinityOfficialNetwork.MediaServer.Native.Core", "InfinityOfficialNetwork.MediaServer.Native.Core\InfinityOfficialNetwork.MediaServer.Native.Core.vcxproj", "{2509654C-471B-4829-96C3-560F48D4ED46}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InfinityOfficialNetwork.MediaServer.Native.Core.Shared", "InfinityOfficialNetwork.MediaServer.Native.Core.Shared\InfinityOfficialNetwork.MediaServer.Native.Core.Shared.vcxproj", "{0F44A4D9-B904-4B41-9152-24BCFC79DEC3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InfinityOfficialNetwork.MediaServer.Native.Interop.Marshall", "InfinityOfficialNetwork.MediaServer.Native.Interop.Marshall\InfinityOfficialNetwork.MediaServer.Native.Interop.Marshall.vcxproj", "{D8882249-B974-47E4-A625-77431110D630}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InfinityOfficialNetwork.MediaServer.Native.Allocator", "InfinityOfficialNetwork.MediaServer.Native.Allocator\InfinityOfficialNetwork.MediaServer.Native.Allocator.vcxproj", "{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +80,30 @@ Global
 		{0F44A4D9-B904-4B41-9152-24BCFC79DEC3}.Release|x64.Build.0 = Release|x64
 		{0F44A4D9-B904-4B41-9152-24BCFC79DEC3}.Release|x86.ActiveCfg = Release|Win32
 		{0F44A4D9-B904-4B41-9152-24BCFC79DEC3}.Release|x86.Build.0 = Release|Win32
+		{D8882249-B974-47E4-A625-77431110D630}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{D8882249-B974-47E4-A625-77431110D630}.Debug|ARM64.Build.0 = Debug|ARM64
+		{D8882249-B974-47E4-A625-77431110D630}.Debug|x64.ActiveCfg = Debug|x64
+		{D8882249-B974-47E4-A625-77431110D630}.Debug|x64.Build.0 = Debug|x64
+		{D8882249-B974-47E4-A625-77431110D630}.Debug|x86.ActiveCfg = Debug|Win32
+		{D8882249-B974-47E4-A625-77431110D630}.Debug|x86.Build.0 = Debug|Win32
+		{D8882249-B974-47E4-A625-77431110D630}.Release|ARM64.ActiveCfg = Release|ARM64
+		{D8882249-B974-47E4-A625-77431110D630}.Release|ARM64.Build.0 = Release|ARM64
+		{D8882249-B974-47E4-A625-77431110D630}.Release|x64.ActiveCfg = Release|x64
+		{D8882249-B974-47E4-A625-77431110D630}.Release|x64.Build.0 = Release|x64
+		{D8882249-B974-47E4-A625-77431110D630}.Release|x86.ActiveCfg = Release|Win32
+		{D8882249-B974-47E4-A625-77431110D630}.Release|x86.Build.0 = Release|Win32
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Debug|ARM64.ActiveCfg = Debug|x64
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Debug|ARM64.Build.0 = Debug|x64
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Debug|x64.ActiveCfg = Debug|x64
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Debug|x64.Build.0 = Debug|x64
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Debug|x86.ActiveCfg = Debug|Win32
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Debug|x86.Build.0 = Debug|Win32
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Release|ARM64.ActiveCfg = Release|x64
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Release|ARM64.Build.0 = Release|x64
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Release|x64.ActiveCfg = Release|x64
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Release|x64.Build.0 = Release|x64
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Release|x86.ActiveCfg = Release|Win32
+		{C0596E99-ED5A-46F5-AFEE-D4A97C6CF964}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

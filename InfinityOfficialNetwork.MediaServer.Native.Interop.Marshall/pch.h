@@ -7,7 +7,30 @@
 #ifndef PCH_H
 #define PCH_H
 
+#pragma managed(push, off)
+#include <boost/asio.hpp>
+#include <boost/asio/experimental/as_single.hpp>
+#include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/asio/experimental/basic_channel.hpp>
+#include <boost/asio/experimental/basic_concurrent_channel.hpp>
+#include <boost/asio/experimental/cancellation_condition.hpp>
+#include <boost/asio/experimental/channel.hpp>
+#include <boost/asio/experimental/channel_error.hpp>
+#include <boost/asio/experimental/channel_traits.hpp>
+#include <boost/asio/experimental/co_composed.hpp>
+#include <boost/asio/experimental/co_spawn.hpp>
+#include <boost/asio/experimental/concurrent_channel.hpp>
+#include <boost/asio/experimental/coro.hpp>
+#include <boost/asio/experimental/coro_traits.hpp>
+#include <boost/asio/experimental/parallel_group.hpp>
+#include <boost/asio/experimental/promise.hpp>
+#include <boost/asio/experimental/use_coro.hpp>
+#include <boost/asio/experimental/use_promise.hpp>
+
 #include <Windows.h>
+#undef min
+#undef max
+#pragma managed(pop)
 
 #pragma warning(disable: 4950)
 

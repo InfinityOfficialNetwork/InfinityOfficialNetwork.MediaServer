@@ -28,17 +28,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="MediaContainer.cpp" />
-    <ClCompile Include="MetadataReader.cpp" />
-    <ClCompile Include="NativeLibraryConfig.cpp" />
-    <ClCompile Include="Transcoder.cpp" />
+    <ClCompile Include="MarshallObject.cpp" />
+    <ClCompile Include="Task.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MediaContainer.h" />
-    <ClInclude Include="MetadataReader.h" />
-    <ClInclude Include="NativeLibraryConfig.h" />
+    <ClInclude Include="MarshallObject.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Transcoder.h" />
+    <ClInclude Include="Task.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
@@ -57,7 +53,7 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <TargetFramework>net10.0</TargetFramework>
     <WindowsTargetPlatformMinVersion>7.0</WindowsTargetPlatformMinVersion>
-	  <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
+    <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
   </PropertyGroup>
   <Import Project="$(SolutionDir)CommonVcxNetCore.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

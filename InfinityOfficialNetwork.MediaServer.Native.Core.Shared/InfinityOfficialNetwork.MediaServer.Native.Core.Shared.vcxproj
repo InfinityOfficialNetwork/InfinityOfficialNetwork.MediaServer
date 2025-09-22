@@ -26,20 +26,26 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-	<PropertyGroup Label="Globals">
-		<VCProjectVersion>17.0</VCProjectVersion>
-		<Keyword>Win32Proj</Keyword>
-		<ProjectGuid>{0F44A4D9-B904-4B41-9152-24BCFC79DEC3}</ProjectGuid>
-		<RootNamespace>$(ProjectName.Replace(".","::"))</RootNamespace>
-		<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-	</PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{0F44A4D9-B904-4B41-9152-24BCFC79DEC3}</ProjectGuid>
+    <RootNamespace>$(ProjectName.Replace(".","::"))</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
   <Import Project="$(SolutionDir)CommonVcx.props" />
   <ItemGroup>
+    <ClInclude Include="allocation.h" />
     <ClInclude Include="BlockingThreadPool.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="GlobalIoContext.h" />
+    <ClInclude Include="NativeThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="allocation.cpp" />
     <ClCompile Include="BlockingThreadPool.cpp" />
+    <ClCompile Include="GlobalIoContext.cpp" />
+    <ClCompile Include="NativeThreadPool.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
