@@ -28,17 +28,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="MediaContainer.cpp" />
-    <ClCompile Include="MetadataReader.cpp" />
-    <ClCompile Include="NativeLibraryConfig.cpp" />
-    <ClCompile Include="Transcoder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MediaContainer.h" />
-    <ClInclude Include="MetadataReader.h" />
-    <ClInclude Include="NativeLibraryConfig.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Transcoder.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
@@ -47,15 +39,6 @@
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\InfinityOfficialNetwork.MediaServer.Native.Allocator\InfinityOfficialNetwork.MediaServer.Native.Allocator.vcxproj">
-      <Project>{c0596e99-ed5a-46f5-afee-d4a97c6cf964}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\InfinityOfficialNetwork.MediaServer.Native.Core.Shared\InfinityOfficialNetwork.MediaServer.Native.Core.Shared.vcxproj">
-      <Project>{0f44a4d9-b904-4b41-9152-24bcfc79dec3}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\InfinityOfficialNetwork.MediaServer.Native.Core\InfinityOfficialNetwork.MediaServer.Native.Core.vcxproj">
-      <Project>{2509654c-471b-4829-96c3-560f48d4ed46}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\InfinityOfficialNetwork.MediaServer.Native.Interop.Marshall\InfinityOfficialNetwork.MediaServer.Native.Interop.Marshall.vcxproj">
       <Project>{d8882249-b974-47e4-a625-77431110d630}</Project>
     </ProjectReference>
