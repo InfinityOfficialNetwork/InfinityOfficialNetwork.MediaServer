@@ -1,5 +1,11 @@
 {
   "dependencies": [
-    "jemalloc"
+    {
+      "name": "ffmpeg",
+      "features": [
+        "all",
+        "all-gpl"
+      ]
+    }
   ]
 }

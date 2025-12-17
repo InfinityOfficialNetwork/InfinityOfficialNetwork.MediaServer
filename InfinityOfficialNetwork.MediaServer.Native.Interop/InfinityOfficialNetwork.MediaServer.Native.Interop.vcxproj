@@ -28,8 +28,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="NativeLibraryConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="NativeLibraryConfig.h" />
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -37,11 +39,6 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\InfinityOfficialNetwork.MediaServer.Native.Interop.Marshall\InfinityOfficialNetwork.MediaServer.Native.Interop.Marshall.vcxproj">
-      <Project>{d8882249-b974-47e4-a625-77431110d630}</Project>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

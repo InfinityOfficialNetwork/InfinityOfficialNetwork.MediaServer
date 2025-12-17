@@ -86,6 +86,8 @@
 	<PropertyGroup Label="Vcpkg">
 		<VcpkgEnableManifest>true</VcpkgEnableManifest>
 		<VcpkgXUseBuiltInApplocalDeps>true</VcpkgXUseBuiltInApplocalDeps>
+		<VcpkgUseStatic>false</VcpkgUseStatic>
+		<VcpkgUseMD>true</VcpkgUseMD>
 	</PropertyGroup>
 
 	<PropertyGroup Label="Vcpkg">
@@ -189,6 +191,13 @@
 			<EnableUAC>false</EnableUAC>
 			<LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
 		</Link>
+	</ItemDefinitionGroup>
+
+	<ItemDefinitionGroup>
+		<ClCompile>
+			<RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebugDLL</RuntimeLibrary>
+			<RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreadedDLL</RuntimeLibrary>
+		</ClCompile>
 	</ItemDefinitionGroup>
 
 

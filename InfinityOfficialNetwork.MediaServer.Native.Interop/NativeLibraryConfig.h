@@ -1,6 +1,7 @@
 #pragma once
 
-namespace InfinityOfficialNetwork::MediaServer::Native::Interop {
+namespace InfinityOfficialNetwork::MediaServer::Native::Interop
+{
 	public enum class AvLogLevel
 	{
 		AvLogQuiet = -8,
@@ -14,25 +15,31 @@ namespace InfinityOfficialNetwork::MediaServer::Native::Interop {
 		AvLogTrace = 56,
 	};
 
-	public ref class LoggingConfiguration
+	delegate void NativeLibraryLoggingProvider (AvLogLevel level, System::String^ message, System::String^ source, int thread);
+
+	public ref class NativeLibraryLoggingConfiguration
 	{
 	public:
-		System::Action<AvLogLevel, System::String^, System::String^,int>^ Logger;
-		AvLogLevel Level;
+		NativeLibraryLoggingProvider^ Logger;
+		AvLogLevel MinimumLogLevel;
 		System::Collections::Generic::IDictionary<System::String^, AvLogLevel>^ ClassLevelOverrides;
 	};
 
 	public ref class NativeLibraryConfig
 	{
-		static void OnProcessExit(System::Object^ sender, System::EventArgs^ e);
-
-		static NativeLibraryConfig();
+	private:
+		static System::Object^ libraryLock = gcnew System::Object ();
 
 	public:
-		static void ConfigureLogging(LoggingConfiguration^ loggingConfiguration);
-		static void ClearLogging();
+		static property System::Object^ LibraryLock {
+			System::Object^ get ()
+			{
+				return libraryLock;
+			}
+		}
+
+		static void SetLoggingConfiguration (NativeLibraryLoggingConfiguration^ config);
 	};
 
 }
-
 
